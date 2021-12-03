@@ -36,15 +36,17 @@ class ToDoListObject: Object {
 class ViewController: UIViewController, UITableViewDelegate ,UITableViewDataSource {
     
     @IBOutlet var table: UITableView!
-
+    public var afterSwitchHandler: (() -> Void)?
     private let realmDB = try! Realm()
     private var data = [ToDoListObject]()
-    var switchTaskIsComplete = false
-    
+    private var indexPathList = [IndexPath]()
+    public var switchTaskIsComplete = false
+    public var indexPathRow = 0
     override func viewDidLoad() {
         super.viewDidLoad()
         data = realmDB.objects(ToDoListObject.self).map({ $0 })
-        table.register(UITableViewCell.self, forCellReuseIdentifier: "cell")
+        table.reloadData()
+        switchTaskIsComplete = false
         table.delegate = self
         table.dataSource = self
     }
@@ -54,72 +56,37 @@ class ViewController: UIViewController, UITableViewDelegate ,UITableViewDataSour
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        var cell = tableView.dequeueReusableCell(withIdentifier: "cell", for: indexPath)
-        cell.textLabel?.text = data[indexPath.row].item
-//        switchTaskIsComplete = false
-        if(cell == nil)
-        {
+        indexPathRow = indexPath.row
+        indexPathList.append(indexPath)
+        var cell = tableView.dequeueReusableCell(withIdentifier: "cell")
+        if cell == nil {
             cell = UITableViewCell(style: UITableViewCell.CellStyle.subtitle, reuseIdentifier: "cell")
         }
-        if (data[indexPath.row].isCompleted == true) {
-            cell.detailTextLabel?.text = "Completed"
-        }
-        else{
-            cell.detailTextLabel?.text = "Pending"
-        }
-
+        cell?.textLabel?.text = data[indexPath.row].item
         
         // Code to add switch in Table cell
-        
         let switchView = UISwitch(frame: .zero)
-//        switchView.setOn(true, animated: true)
-//        switchView.isOn = true
-//        if (data[indexPath.row].isCompleted == false){
-//            switchView.setOn(false, animated: true)
-//        }
-//        else{
-//            switchView.setOn(true, animated: true)
-//        }
-//        switchView.setOn(false, animated: true)
         switchView.tag = indexPath.row
         switchView.addTarget(self, action: #selector(self.switchChanged(_:)), for: .valueChanged)
-        if (self.switchTaskIsComplete == true){
-            print("OOOOOOOOOOOOOOO")
-            switchView.setOn(true, animated: true)
-            try! realmDB.write {
-                data[indexPath.row].isCompleted = true
-                print("Yeeeeeeeeeeeeessssssssssss")
-            }
-//            data[indexPath.row].isCompleted = true
-        }
-        else{
-            switchView.setOn(false, animated: true)
-            try! realmDB.write {
-                data[indexPath.row].isCompleted = false
-            }
-//            data[indexPath.row].isCompleted = false
-        }
-//        switchView.setOn(true, animated: true)
         
-        if (data[indexPath.row].isCompleted == false){
-            print("It is false **************************")
-            switchView.setOn(false, animated: true)
-        }
-        else{
-            print("It is true **************************")
+        if (data[indexPath.row].isCompleted == true) {
+            cell?.detailTextLabel?.text = "Completed"
             switchView.setOn(true, animated: true)
         }
-
-        if (switchTaskIsComplete == false){
+        else if (data[indexPath.row].isCompleted == false){
+            cell?.detailTextLabel?.text = "Pending"
             switchView.setOn(false, animated: true)
         }
-        else{
-            switchView.setOn(true, animated: true)
+        if (data[indexPath.row].isCompleted == true) {
+            cell?.detailTextLabel?.text = "Completed"
         }
-        cell.accessoryView = switchView
-
-        return cell
+        else if (data[indexPath.row].isCompleted == false){
+            cell?.detailTextLabel?.text = "Pending"
+        }
+        cell!.accessoryView = switchView
+        return cell!
     }
+
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
@@ -132,6 +99,10 @@ class ViewController: UIViewController, UITableViewDelegate ,UITableViewDataSour
         vc.deletionHandler = { [weak self] in
             self?.refresh()
         }
+        vc.afterEditHandler = { [weak self] in
+            self?.refresh()
+        }
+        
         vc.navigationItem.largeTitleDisplayMode = .never
         vc.title = item.item
         navigationController?.pushViewController(vc, animated: true)
@@ -159,18 +130,31 @@ class ViewController: UIViewController, UITableViewDelegate ,UITableViewDataSour
     }
 
     @objc func switchChanged(_ sender: UISwitch) {
+        indexPathRow = sender.tag
         if (sender.isOn){
-            DispatchQueue.main.async {
-                self.switchTaskIsComplete = true
-                print("LLLLLLLLLLLLLLLLL")
+            try! realmDB.write{
+                data[indexPathRow].isCompleted = true
+            }
+            afterSwitchHandler?()
+            if let cell = table.cellForRow(at: indexPathList[indexPathRow]) as? UITableViewCell{
+                cell.detailTextLabel?.text = "Completed"
             }
         }
         else{
-            DispatchQueue.main.async {
-                self.switchTaskIsComplete = false
+            try! realmDB.write{
+                data[indexPathRow].isCompleted = false
+            }
+            afterSwitchHandler?()
+            if let cell = table.cellForRow(at: indexPathList[indexPathRow]) as? UITableViewCell{
+                cell.detailTextLabel?.text = "Pending"
             }
         }
+        print(data[indexPathRow].isCompleted)
     }
-
+    
+    override func didReceiveMemoryWarning() {
+        super.didReceiveMemoryWarning()
+        // Dispose of any resources that can be recreated.
+    }
 }
 

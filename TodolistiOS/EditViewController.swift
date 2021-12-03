@@ -74,12 +74,14 @@ class EditViewController: UIViewController {
     
     @objc func switchStateDidChange(_ sender:UISwitch!)
     {
+
         if (sender.isOn){
 //            isCompletedFlag = true
             try! realmDB.write {
                 item?.isCompleted = true
             }
             isCompletedLabel.text = "Completed"
+            print(item?.isCompleted)
         }
         else{
 //            isCompletedFlag = false
@@ -105,25 +107,6 @@ class EditViewController: UIViewController {
             datePicker.isHidden = true
         }
     }
-
-//    @IBAction func isCompletedSwitchs(_ sender: UISwitch) {
-//            if (sender.isOn){
-//                isCompletedFlag = true
-//                try! realmDB.write {
-//                    item?.isCompleted = true
-//                }
-//                isCompletedLabel.text = "Completed"
-//            }
-//            else{
-//                isCompletedFlag = false
-//                try! realmDB.write {
-//                    item?.isCompleted = false
-//                }
-//                isCompletedLabel.text = "Pending"
-//            }
-//    }
-//
-    
     
     @objc private func didTapSaveEdit()
     {
@@ -148,12 +131,6 @@ class EditViewController: UIViewController {
                 else if (isCompletedLabel.text == "Pending"){
                     item?.isCompleted = false
                 }
-//                if (isCompletedFlag == true){
-//                    item?.isCompleted = true
-//                }
-//                else{
-//                    item?.isCompleted = false
-//                }
             }
             
             // ? means that the completionhandler is optional
