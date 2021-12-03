@@ -21,7 +21,7 @@ class EditViewController: UIViewController {
     public var item: ToDoListObject?
     
     var hasDueDateSwitchFlag = true
-    var isCompletedFlag = false
+//    var isCompletedFlag = false
     // We are going to call this function once the item has been deleted and we are goiing to referesh list as it doesnt exist anymore
     public var deletionHandler: (() -> Void)?
     
@@ -30,9 +30,6 @@ class EditViewController: UIViewController {
     @IBOutlet var itemLabel: UILabel!
     @IBOutlet var dateLabel: UILabel!
     @IBOutlet var isCompletedLabel: UILabel!
-//    @IBOutlet var noteDescriptionLabel: UILabel!
-    
-//    @IBOutlet var textField: UITextField!
     @IBOutlet var datePicker: UIDatePicker!
     @IBOutlet var descriptionNote: UITextField!
     
@@ -57,6 +54,17 @@ class EditViewController: UIViewController {
         descriptionNote.text = item?.notes
         datePicker.setDate(Date(), animated: true)
         
+        let switchDemo=UISwitch(frame:CGRect(x: 324, y: 775, width: 0, height: 0))
+        switchDemo.addTarget(self, action: #selector(self.switchStateDidChange(_:)), for: .valueChanged)
+        switchDemo.setOn(false, animated: false)
+        if (item?.isCompleted == true) {
+            switchDemo.setOn(true, animated: false)
+        }
+        else{
+            switchDemo.setOn(false, animated: false)
+        }
+//        switchDemo.setOn(true, animated: false)
+        self.view.addSubview(switchDemo)
         
         navigationItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: .trash, target: self, action: #selector(didTapDelete))
         
@@ -64,6 +72,28 @@ class EditViewController: UIViewController {
         navigationItem.leftBarButtonItem = UIBarButtonItem(barButtonSystemItem: .save, target: self, action: #selector(didTapSaveEdit))
     }
     
+    @objc func switchStateDidChange(_ sender:UISwitch!)
+    {
+        if (sender.isOn){
+//            isCompletedFlag = true
+            try! realmDB.write {
+                item?.isCompleted = true
+            }
+            isCompletedLabel.text = "Completed"
+        }
+        else{
+//            isCompletedFlag = false
+            try! realmDB.write {
+                item?.isCompleted = false
+            }
+            isCompletedLabel.text = "Pending"
+        }
+    }
+    
+    override func didReceiveMemoryWarning() {
+        super.didReceiveMemoryWarning()
+        // Dispose of any resources that can be recreated.
+    }
     
     @IBAction func hasDueDateSwitchEdits(_ sender: UISwitch) {
         if (sender.isOn){
@@ -76,22 +106,24 @@ class EditViewController: UIViewController {
         }
     }
 
-    @IBAction func isCompletedSwitchs(_ sender: UISwitch) {
-            if (sender.isOn){
-                isCompletedFlag = true
-                try! realmDB.write {
-                    item?.isCompleted = true
-                }
-                isCompletedLabel.text = "Completed"
-            }
-            else{
-                isCompletedFlag = false
-                try! realmDB.write {
-                    item?.isCompleted = false
-                }
-                isCompletedLabel.text = "Pending"
-            }
-    }
+//    @IBAction func isCompletedSwitchs(_ sender: UISwitch) {
+//            if (sender.isOn){
+//                isCompletedFlag = true
+//                try! realmDB.write {
+//                    item?.isCompleted = true
+//                }
+//                isCompletedLabel.text = "Completed"
+//            }
+//            else{
+//                isCompletedFlag = false
+//                try! realmDB.write {
+//                    item?.isCompleted = false
+//                }
+//                isCompletedLabel.text = "Pending"
+//            }
+//    }
+//
+    
     
     @objc private func didTapSaveEdit()
     {
@@ -110,12 +142,18 @@ class EditViewController: UIViewController {
                     item?.hasdueDate = false
                     item?.date = Date(timeIntervalSinceReferenceDate: 0)
                 }
-                if (isCompletedFlag == true){
+                if (isCompletedLabel.text == "Completed"){
                     item?.isCompleted = true
                 }
-                else{
+                else if (isCompletedLabel.text == "Pending"){
                     item?.isCompleted = false
                 }
+//                if (isCompletedFlag == true){
+//                    item?.isCompleted = true
+//                }
+//                else{
+//                    item?.isCompleted = false
+//                }
             }
             
             // ? means that the completionhandler is optional

@@ -56,7 +56,7 @@ class ViewController: UIViewController, UITableViewDelegate ,UITableViewDataSour
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         var cell = tableView.dequeueReusableCell(withIdentifier: "cell", for: indexPath)
         cell.textLabel?.text = data[indexPath.row].item
-        
+//        switchTaskIsComplete = false
         if(cell == nil)
         {
             cell = UITableViewCell(style: UITableViewCell.CellStyle.subtitle, reuseIdentifier: "cell")
@@ -72,7 +72,15 @@ class ViewController: UIViewController, UITableViewDelegate ,UITableViewDataSour
         // Code to add switch in Table cell
         
         let switchView = UISwitch(frame: .zero)
-        switchView.setOn(false, animated: true)
+//        switchView.setOn(true, animated: true)
+//        switchView.isOn = true
+//        if (data[indexPath.row].isCompleted == false){
+//            switchView.setOn(false, animated: true)
+//        }
+//        else{
+//            switchView.setOn(true, animated: true)
+//        }
+//        switchView.setOn(false, animated: true)
         switchView.tag = indexPath.row
         switchView.addTarget(self, action: #selector(self.switchChanged(_:)), for: .valueChanged)
         if (self.switchTaskIsComplete == true){
@@ -90,6 +98,23 @@ class ViewController: UIViewController, UITableViewDelegate ,UITableViewDataSour
                 data[indexPath.row].isCompleted = false
             }
 //            data[indexPath.row].isCompleted = false
+        }
+//        switchView.setOn(true, animated: true)
+        
+        if (data[indexPath.row].isCompleted == false){
+            print("It is false **************************")
+            switchView.setOn(false, animated: true)
+        }
+        else{
+            print("It is true **************************")
+            switchView.setOn(true, animated: true)
+        }
+
+        if (switchTaskIsComplete == false){
+            switchView.setOn(false, animated: true)
+        }
+        else{
+            switchView.setOn(true, animated: true)
         }
         cell.accessoryView = switchView
 
