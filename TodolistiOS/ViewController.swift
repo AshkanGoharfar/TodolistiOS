@@ -68,7 +68,60 @@ class ViewController: UIViewController, UITableViewDelegate ,UITableViewDataSour
         return true
     }
 
-     
+    
+    /**
+     * This function aims to create a swipe of right to left to show delete and taskStatus buttons and after pressing the taskStatus button if the task is pending it changes to completed or if is completed it changes to pending. If we use long swipe the task wil be deleted and remove from database.
+     */
+
+    func tableView(_ tableView: UITableView, trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
+
+           // delete
+           let deleteSwipe = UIContextualAction(style: .normal, title: "Delete") { (action, view, completionHandler) in
+           completionHandler(true)
+           self.realmDB.beginWrite()
+           self.realmDB.delete(self.data[indexPath.row])
+           try! self.realmDB.commitWrite()
+
+           // we use ? because the function is optional
+           self.deletionHandler?()
+
+          self.data.remove(at: indexPath.row)
+          self.table.deleteRows(at: [indexPath], with: .automatic)
+       }
+       deleteSwipe.image = UIImage(systemName: "trash")
+       deleteSwipe.backgroundColor = .red
+
+       // switch
+       let switchSwipe = UIContextualAction(style: .normal, title: "TaskStatus") { (action, view, completionHandler) in
+           completionHandler(true)
+           if (self.data[indexPath.row].isCompleted == false){
+               try! self.realmDB.write{
+                   self.data[indexPath.row].isCompleted = true
+               }
+               self.afterSwitchHandler?()
+               if let cell = self.table.cellForRow(at: indexPath) as? UITableViewCell{
+                   cell.detailTextLabel?.text = "Completed"
+               }
+           }
+           else{
+               try! self.realmDB.write{
+                   self.data[indexPath.row].isCompleted = false
+               }
+               self.afterSwitchHandler?()
+               if let cell = self.table.cellForRow(at: indexPath) as? UITableViewCell{
+                   cell.detailTextLabel?.text = "Pending"
+               }
+           }
+       }
+       switchSwipe.backgroundColor = .green
+
+       // swipe
+       let swipeRightToLeft = UISwipeActionsConfiguration(actions: [deleteSwipe, switchSwipe])
+
+       return swipeRightToLeft
+
+     }
+
     
     /**
      * This function aims to create a swipe of left to write to show blue edit button and after pressing the edit button navigate to edit screen.
@@ -76,7 +129,6 @@ class ViewController: UIViewController, UITableViewDelegate ,UITableViewDataSour
      func tableView(_ tableView: UITableView, leadingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
 
          let editSwipe = UIContextualAction(style: .normal, title: "Edit") { (action, view, completionHandler) in
-         print("Edit: \(indexPath.row + 1)")
          completionHandler(true)
              let item = self.data[indexPath.row]
              
