@@ -37,6 +37,8 @@ class ViewController: UIViewController, UITableViewDelegate ,UITableViewDataSour
     
     @IBOutlet var table: UITableView!
     public var afterSwitchHandler: (() -> Void)?
+    public var deletionHandler: (() -> Void)?
+
     private let realmDB = try! Realm()
     private var data = [ToDoListObject]()
     private var indexPathList = [IndexPath]()
@@ -51,6 +53,60 @@ class ViewController: UIViewController, UITableViewDelegate ,UITableViewDataSour
         table.dataSource = self
     }
     
+    
+    
+    
+    
+    
+    
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        table.frame = view.bounds
+    }
+    
+    func tableView(_ tableView: UITableView, canEditRowAt indexPath: IndexPath) -> Bool {
+        return true
+    }
+
+     
+     
+     func tableView(_ tableView: UITableView, leadingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
+
+         let editSwipe = UIContextualAction(style: .normal, title: "Edit") { (action, view, completionHandler) in
+         print("Edit: \(indexPath.row + 1)")
+         completionHandler(true)
+             let item = self.data[indexPath.row]
+             
+             guard let vc = self.storyboard?.instantiateViewController(withIdentifier: "edit") as? EditViewController else {
+                 return
+             }
+             vc.item = item
+             vc.deletionHandler = { [weak self] in
+                 self?.refresh()
+             }
+             vc.afterEditHandler = { [weak self] in
+                 self?.refresh()
+             }
+             
+             vc.navigationItem.largeTitleDisplayMode = .never
+             vc.title = item.item
+             self.navigationController?.pushViewController(vc, animated: true)
+       }
+         editSwipe.image = UIImage(systemName: "pencil")
+         editSwipe.backgroundColor = .blue
+       
+       // swipe
+       let swipeLeftToRight = UISwipeActionsConfiguration(actions: [editSwipe])
+       
+       return swipeLeftToRight
+     }
+
+    
+    
+    
+    
+    
+    
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         data.count
     }
@@ -64,49 +120,62 @@ class ViewController: UIViewController, UITableViewDelegate ,UITableViewDataSour
         }
         cell?.textLabel?.text = data[indexPath.row].item
         
-        // Code to add switch in Table cell
-        let switchView = UISwitch(frame: .zero)
-        switchView.tag = indexPath.row
-        switchView.addTarget(self, action: #selector(self.switchChanged(_:)), for: .valueChanged)
+        if (data[indexPath.row].isCompleted == true) {
+            cell?.detailTextLabel?.text = "Completed"
+        }
+        else if (data[indexPath.row].isCompleted == false){
+            cell?.detailTextLabel?.text = "Pending"
+        }
+
         
-        if (data[indexPath.row].isCompleted == true) {
-            cell?.detailTextLabel?.text = "Completed"
-            switchView.setOn(true, animated: true)
-        }
-        else if (data[indexPath.row].isCompleted == false){
-            cell?.detailTextLabel?.text = "Pending"
-            switchView.setOn(false, animated: true)
-        }
-        if (data[indexPath.row].isCompleted == true) {
-            cell?.detailTextLabel?.text = "Completed"
-        }
-        else if (data[indexPath.row].isCompleted == false){
-            cell?.detailTextLabel?.text = "Pending"
-        }
-        cell!.accessoryView = switchView
+        
+        
+        
+        
+        
+//        // Code to add switch in Table cell
+//        let switchView = UISwitch(frame: .zero)
+//        switchView.tag = indexPath.row
+//        switchView.addTarget(self, action: #selector(self.switchChanged(_:)), for: .valueChanged)
+//
+//        if (data[indexPath.row].isCompleted == true) {
+//            cell?.detailTextLabel?.text = "Completed"
+//            switchView.setOn(true, animated: true)
+//        }
+//        else if (data[indexPath.row].isCompleted == false){
+//            cell?.detailTextLabel?.text = "Pending"
+//            switchView.setOn(false, animated: true)
+//        }
+//        if (data[indexPath.row].isCompleted == true) {
+//            cell?.detailTextLabel?.text = "Completed"
+//        }
+//        else if (data[indexPath.row].isCompleted == false){
+//            cell?.detailTextLabel?.text = "Pending"
+//        }
+//        cell!.accessoryView = switchView
         return cell!
     }
 
     
-    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        tableView.deselectRow(at: indexPath, animated: true)
-        let item = data[indexPath.row]
-        
-        guard let vc = storyboard?.instantiateViewController(withIdentifier: "edit") as? EditViewController else {
-            return
-        }
-        vc.item = item
-        vc.deletionHandler = { [weak self] in
-            self?.refresh()
-        }
-        vc.afterEditHandler = { [weak self] in
-            self?.refresh()
-        }
-        
-        vc.navigationItem.largeTitleDisplayMode = .never
-        vc.title = item.item
-        navigationController?.pushViewController(vc, animated: true)
-    }
+//    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+//        tableView.deselectRow(at: indexPath, animated: true)
+//        let item = data[indexPath.row]
+//
+//        guard let vc = storyboard?.instantiateViewController(withIdentifier: "edit") as? EditViewController else {
+//            return
+//        }
+//        vc.item = item
+//        vc.deletionHandler = { [weak self] in
+//            self?.refresh()
+//        }
+//        vc.afterEditHandler = { [weak self] in
+//            self?.refresh()
+//        }
+//
+//        vc.navigationItem.largeTitleDisplayMode = .never
+//        vc.title = item.item
+//        navigationController?.pushViewController(vc, animated: true)
+//    }
     
     @IBAction func pressedAddNewTaskButton()
     {
