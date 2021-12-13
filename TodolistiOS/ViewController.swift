@@ -13,7 +13,7 @@
 
 
 /**
- * This assignment aims to craete an iOS app for to do list in which when we press + button new task should be added to the Realm database and also all of the CRUD operations should work perfectly therefore we can delete or edit the tasks.
+ * This assignment aims to craete an iOS app for to do list in which when we press + button new task should be added to the Realm database and also all of the CRUD operations should work perfectly therefore we can delete or edit the tasks using swipes. In this regard, we have implemented a swipe of right to left to show delete and taskStatus buttons with their functionalities and also we have created a swipe of left to right to show blue edit button with its functionality.
  */
 
 
@@ -52,12 +52,6 @@ class ViewController: UIViewController, UITableViewDelegate ,UITableViewDataSour
         table.delegate = self
         table.dataSource = self
     }
-    
-    
-    
-    
-    
-    
     
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
@@ -113,7 +107,7 @@ class ViewController: UIViewController, UITableViewDelegate ,UITableViewDataSour
                }
            }
        }
-       switchSwipe.backgroundColor = .green
+       switchSwipe.backgroundColor = .yellow
 
        // swipe
        let swipeRightToLeft = UISwipeActionsConfiguration(actions: [deleteSwipe, switchSwipe])
@@ -124,7 +118,7 @@ class ViewController: UIViewController, UITableViewDelegate ,UITableViewDataSour
 
     
     /**
-     * This function aims to create a swipe of left to write to show blue edit button and after pressing the edit button navigate to edit screen.
+     * This function aims to create a swipe of left to right to show blue edit button and after pressing the edit button navigate to edit screen.
      */
      func tableView(_ tableView: UITableView, leadingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
 
@@ -156,10 +150,6 @@ class ViewController: UIViewController, UITableViewDelegate ,UITableViewDataSour
        return swipeLeftToRight
      }
 
-    
-    
-    
-    
     
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
