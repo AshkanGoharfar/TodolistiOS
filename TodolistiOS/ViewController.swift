@@ -3,8 +3,8 @@
 //  TodolistiOS
 //
 // Created by Ashkan Goharfar on 9/10/1400 AP.
-// Assignment: Asssignment 5  - TODO List App - Part 2 - App UI
-// Date: 2021-12-01
+// Assignment: Asssignment 6  - TODO List App - Part 3 - App UI
+// Date: 2021-12-09
 // Group Members:
 // Member 1: Ashkan Goharfar - 301206729
 // Member 2: Inderjitsingh Darshansingh Labana - 301149169
@@ -69,7 +69,10 @@ class ViewController: UIViewController, UITableViewDelegate ,UITableViewDataSour
     }
 
      
-     
+    
+    /**
+     * This function aims to create a swipe of left to write to show blue edit button and after pressing the edit button navigate to edit screen.
+     */
      func tableView(_ tableView: UITableView, leadingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
 
          let editSwipe = UIContextualAction(style: .normal, title: "Edit") { (action, view, completionHandler) in
